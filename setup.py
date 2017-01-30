@@ -1,6 +1,6 @@
 import os
 from setuptools import find_packages, setup
-from adlogic3_auth_client import __version__, __author__, __author_email__
+from django_helpers import __version__, __author__, __author_email__
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
