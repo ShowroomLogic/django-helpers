@@ -7,6 +7,7 @@ from django.http import QueryDict
 from django.template import Template, RequestContext
 
 from ..builtins import (
+    get_item,
     active_path,
     active_query,
     query,
@@ -31,6 +32,13 @@ nested_patterns = [
 urlpatterns = [
     url(r'^foo/', include(nested_patterns, namespace="namespace"))
 ]
+
+
+class GetItemTestCase(TestCase):
+    def test_get_item(self):
+        dictionary = {'a': 1, 'b': 2}
+        self.assertEquals(get_item(dictionary, 'a'), 1)
+        self.assertEquals(get_item(dictionary, 'b'), 2)
 
 
 @override_settings(ROOT_URLCONF=__name__)
