@@ -76,3 +76,39 @@ class SearchFilter(django_filters.Filter):
                 qs = qs.filter(filter)
     
         return qs
+
+
+def get_filter_value_list(data, key, is_int=False):
+    """
+    Get a list of values from a QueryDict (or string or list/tuple).
+    This function supports both plain lists of values and values that are
+    comma separated values. For example: '1,2,3' or [1,2,3] or ['1,2,3', '4'].
+    When is_int == True then all the values will be cast to an int. If the values
+    are not ints they will be ignored (in order to avoid nasty excpetions in the api).
+    """
+
+    raw_value = []
+    if isinstance(data, QueryDict):
+        raw_value = data.getlist(key, [])
+    elif not isinstance(data, (list, tuple)):
+        raw_value = data.split(',')
+    else:
+        raw_value = data
+
+    value = []
+    for v in raw_value:
+        if v:
+            for vv in v.split(','):
+                if vv:
+                    if is_int:
+                        try:
+                            value.append(int(vv))
+                        except ValueError:
+                            pass  # If it's not an int ignore it nicely
+                    else:
+                        value.append(vv)
+
+    if not value or value == ['']:
+        value = None
+
+    return value

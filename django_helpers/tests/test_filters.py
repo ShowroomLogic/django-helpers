@@ -1,11 +1,12 @@
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.http.request import QueryDict
 from django.db import models
 from . import settings
 
 import django_filters
 
-from ..filters import DefaultFilterSet, TagFilter, SearchFilter
+from ..filters import DefaultFilterSet, TagFilter, SearchFilter, get_filter_value_list
 
 
 class MockQuerySet(object):
@@ -167,3 +168,50 @@ class SearchFilterTestCase(TestCase):
         filter = TestFilterSet(request.GET, qs)
         self.assertEquals(filter.qs.filters['name__icontains'], 'bar')
         self.assertEquals(filter.qs.filters['status__startswith'], 'bar')
+
+
+class TestGetFilterValueList(TestCase):
+    def test_string(self):
+        value = get_filter_value_list('a,b,c', 'key')
+        self.assertEquals(len(value), 3)
+        self.assertIn('a', value)
+        self.assertIn('b', value)
+        self.assertIn('c', value)
+
+    def test_list(self):
+        value = get_filter_value_list(['a', 'b', 'c'], 'key')
+        self.assertEquals(len(value), 3)
+        self.assertIn('a', value)
+        self.assertIn('b', value)
+        self.assertIn('c', value)
+
+    def test_ints(self):
+        data = QueryDict('key=1,2&key=3')
+        value = get_filter_value_list(data, 'key', is_int=True)
+
+        self.assertEquals(len(value), 3)
+        self.assertIn(1, value)
+        self.assertIn(2, value)
+        self.assertIn(3, value)
+
+    def test_strings(self):
+        data = QueryDict('key=a,b&key=c')
+        value = get_filter_value_list(data, 'key')
+
+        self.assertEquals(len(value), 3)
+        self.assertIn('a', value)
+        self.assertIn('b', value)
+        self.assertIn('c', value)
+
+    def test_invalid_ints(self):
+        data = QueryDict('key=1,a&key=3')
+        value = get_filter_value_list(data, 'key', is_int=True)
+
+        self.assertEquals(len(value), 2)
+        self.assertIn(1, value)
+        self.assertIn(3, value)
+
+    def test_empty(self):
+        data = QueryDict('key=')
+        value = get_filter_value_list(data, 'key', is_int=True)
+        self.assertIs(value, None)

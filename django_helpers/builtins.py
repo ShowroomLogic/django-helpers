@@ -12,13 +12,18 @@ register = template.Library()
 
 @register.filter
 def get_item(dictionary, key):
+    """
+    Returns a value from the provided dictionary by key.
+    """
     return dictionary.get(key)
 
 
 @register.simple_tag(takes_context=True)
 def active_path(context, path, exact=False, active_class="active", **kwargs):
     """
-    TODO: This needs Documentation
+    This tag will return the active_class when the current route matches the
+    path passed in. This is useful for marking menu items as active when a user
+    is on that menu item's page.
     """
 
     is_match = False
@@ -57,8 +62,11 @@ def active_path(context, path, exact=False, active_class="active", **kwargs):
 @register.simple_tag(takes_context=True)
 def active_query(context, active_class="active", **kwargs):
     """
-    TODO: Needs documentation
+    This tag will return the active_class if the current url params match
+    the values passed into the kwargs. This is useful for making filters
+    "active" when they exist in the url params.
     """
+    
     query_dict = context['request'].GET.copy()
     for k, v in kwargs.items():
         v = str(v)
@@ -84,7 +92,9 @@ def active_query_by_key(context, key, value, active_class="active"):
 @register.simple_tag(takes_context=True)
 def query(context, **kwargs):
     """
-    TODO: This needs Documentation
+    This tag will create a url based on the current url by replacing the params
+    with the values passed in as kwargs (if an existing parameter is not in the
+    kwargs it will remain unchanged in the returned url).
     """
     updated = context['request'].GET.copy()
     for k, v in kwargs.items():
@@ -110,7 +120,9 @@ def query_by_key(context, key, value):
 @register.simple_tag(takes_context=True)
 def query_toggle(context, **kwargs):
     """
-    TODO: This neds Documentation
+    This tag will create a url based on the current url by toggling the values
+    passed in as kwargs. If the value of a kwarg exists in the url params it will
+    be removed, if it does not exist it will be added.
     """
     updated = context['request'].GET.copy()
     for k, v in kwargs.items():
